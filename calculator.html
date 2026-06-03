@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Canine Progesterone Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #EDF2F7;
+    --surface: #FFFFFF;
+    --surface2: #F8FAFC;
+    --border: #D1DDE8;
+    --border-lt: #E8EEF4;
+    --text: #0D1B2A;
+    --muted: #5A6B7A;
+    --mutedLt: #8FA0AE;
+    --blue: #1976D2;
+    --blueDeep: #1565C0;
+    --blueLt: #E3F0FC;
+    --bluePale: #EBF4FF;
+    --green: #166534;
+    --greenBg: #DCFCE7;
+    --amber: #92400E;
+    --amberBg: #FEF3C7;
+    --orange: #9A3412;
+    --orangeBg: #FFEDD5;
+    --gray: #5A6B7A;
+    --grayBg: #F0F4F8;
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+
+  header {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--blueLt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo svg { display: block; }
+
+  .header-text h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .header-text p {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .main {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .input-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 14px;
+  }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .prog-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    width: 200px;
+    outline: none;
+    transition: border-color .2s;
+    -moz-appearance: textfield;
+  }
+
+  .prog-input::-webkit-outer-spin-button,
+  .prog-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .prog-input:focus { border-color: var(--blue); }
+
+  .unit-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .bar-section { margin-top: 20px; }
+
+  .bar-track {
+    height: 8px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    position: relative;
+    overflow: visible;
+  }
+
+  .bar-segments {
+    display: flex;
+    height: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0.25;
+    position: absolute;
+    inset: 0;
+  }
+
+  .bar-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--surface);
+    position: absolute;
+    top: -5px;
+    transform: translateX(-50%);
+    transition: left .3s ease, background .3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .bar-labels span {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--mutedLt);
+  }
+
+  .bar-unit {
+    text-align: center;
+    font-size: 10px;
+    color: var(--mutedLt);
+    margin-top: 2px;
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    animation: fadeIn .25s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .phase-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .result-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .result-value span {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 10px 0 14px;
+  }
+
+  .next-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .next-box {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .metric {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  .metric-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .whelp-card {
+    background: var(--bluePale);
+    border: 0.5px solid #BFDBFE;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    animation: fadeIn .25s ease;
+  }
+
+  .whelp-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .whelp-date {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .whelp-window {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .placeholder-text {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .placeholder-text strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--mutedLt);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#1976D2" stroke="#1976D2" stroke-width="0.3">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>Progesterone Calculator</h1>
+    <p>Canine Whelping Predictor</p>
+  </div>
+</header>
+
+<div class="main">
+  <div class="input-card">
+    <div class="input-label">Enter progesterone value</div>
+    <div class="input-row">
+      <input class="prog-input" type="number" id="prog-input" placeholder="0.00" min="0" max="100" step="0.01" autofocus />
+      <span class="unit-label">ng/mL</span>
+    </div>
+
+    <div class="bar-section">
+      <div class="bar-track">
+        <div class="bar-segments">
+          <div style="flex:10;background:#94A3B8"></div>
+          <div style="flex:10;background:#F59E0B"></div>
+          <div style="flex:20;background:#F97316"></div>
+          <div style="flex:35;background:#22C55E"></div>
+          <div style="flex:25;background:#1976D2"></div>
+        </div>
+        <div class="bar-dot" id="bar-dot" style="left:3%;background:#94A3B8;display:none;"></div>
+      </div>
+      <div class="bar-labels">
+        <span>0</span><span>1</span><span>2</span><span>5</span><span>15</span><span>30+</span>
+      </div>
+      <div class="bar-unit">ng/mL</div>
+    </div>
+  </div>
+
+  <div id="results">
+    <div class="placeholder-text">
+      <strong>No value entered</strong>
+      Type a progesterone value above to get instant results.
+    </div>
+  </div>
+</div>
+
+<footer>For veterinary reference only. Always confirm findings with a qualified clinician.</footer>
+
+<script>
+const inp = document.getElementById('prog-input');
+const resultsEl = document.getElementById('results');
+const barDot = document.getElementById('bar-dot');
+
+const PHASES = [
+  { max: 1,   label: 'Baseline',       color: '#5A6B7A', bg: '#F0F4F8',  dotColor: '#94A3B8', desc: 'Early proestrus. Progesterone is at baseline — the dog is not yet approaching ovulation.', next: 'Retest in 3–4 days. Continue monitoring for rising values.' },
+  { max: 2,   label: 'Pre-LH surge',   color: '#92400E', bg: '#FEF3C7',  dotColor: '#F59E0B', desc: 'Progesterone is beginning to rise. The LH surge is approaching but has not yet occurred.', next: 'Retest in 1–2 days. Values are rising toward the LH surge threshold (2 ng/mL).' },
+  { max: 5,   label: 'LH surge',       color: '#9A3412', bg: '#FFEDD5',  dotColor: '#F97316', desc: 'LH surge detected. This marks the start of the fertile window. Ovulation is expected within 24–48 hours.', next: 'Retest daily. Ovulation is imminent — breeding can begin.' },
+  { max: 15,  label: 'Ovulating',      color: '#166534', bg: '#DCFCE7',  dotColor: '#22C55E', desc: 'Ovulation confirmed. Eggs are being released and the breeding window is now open. Peak fertility is 2–3 days post-ovulation.', next: 'Retest in 48 h to confirm peak. Whelping countdown active — expected in 63 days from ovulation.' },
+  { max: Infinity, label: 'Post-ovulation', color: '#1565C0', bg: '#E3F0FC', dotColor: '#1976D2', desc: 'Post-ovulation phase. Elevated progesterone confirms ovulation has occurred. The pregnancy maintenance phase has begun.', next: 'Monitor rectal temperature daily from day 55. Elective C-section window: days 61–62 post-ovulation.' },
+];
+
+function getPhase(v) {
+  return PHASES.find(p => v < p.max) || PHASES[PHASES.length - 1];
+}
+
+function getBarPct(v) {
+  if (v <= 0) return 3;
+  return Math.min(97, Math.max(3, (Math.log(v + 1) / Math.log(31)) * 100));
+}
+
+function fmtLong(d) {
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function fmtShort(d) {
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate() + n); return r;
+}
+
+function render(val) {
+  if (val === '' || isNaN(parseFloat(val)) || parseFloat(val) < 0) {
+    barDot.style.display = 'none';
+    resultsEl.innerHTML = `<div class="placeholder-text"><strong>No value entered</strong>Type a progesterone value above to get instant results.</div>`;
+    return;
+  }
+
+  const v = parseFloat(val);
+  const ph = getPhase(v);
+  const pct = getBarPct(v);
+
+  barDot.style.display = 'block';
+  barDot.style.left = pct + '%';
+  barDot.style.background = ph.dotColor;
+
+  let whelpHTML = '';
+  if (v >= 5) {
+    const today = new Date();
+    const whelp = addDays(today, 63);
+    const early = addDays(whelp, -1);
+    const late  = addDays(whelp, 1);
+    const csOpen  = addDays(today, 61);
+    const csClose = addDays(today, 62);
+
+    whelpHTML = `
+    <div class="whelp-card">
+      <div class="whelp-title">Predicted whelping date</div>
+      <div class="whelp-date">${fmtLong(whelp)}</div>
+      <div class="whelp-window">Window: ${fmtShort(early)} – ${fmtShort(late)} (±1 day)</div>
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Days to whelping</div>
+          <div class="metric-value">63 days</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">C-section window</div>
+          <div class="metric-value">${fmtShort(csOpen)} – ${fmtShort(csClose)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">C-section opens</div>
+          <div class="metric-value">${fmtLong(csOpen).split(',')[0]}, ${fmtShort(csOpen)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Based on</div>
+          <div class="metric-value">Confirmed ovulation</div>
+        </div>
+      </div>
+      <div class="next-label">C-section note</div>
+      <div class="next-box">Optimal elective C-section window is day 61–62 post-ovulation. Neonatal lung maturity is highest during this period.</div>
+    </div>`;
+  }
+
+  resultsEl.innerHTML = `
+    <div class="result-card">
+      <span class="phase-badge" style="background:${ph.bg};color:${ph.color};">${ph.label}</span>
+      <div class="result-value">${v.toFixed(2)}<span>ng/mL</span></div>
+      <div class="result-desc">${ph.desc}</div>
+      <div class="next-label">Next step</div>
+      <div class="next-box">${ph.next}</div>
+    </div>
+    ${whelpHTML}
+  `;
+}
+
+inp.addEventListener('input', () => render(inp.value));
+</script>
+</body>
+</html>
